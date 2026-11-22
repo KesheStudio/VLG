@@ -1,0 +1,8 @@
+{
+  "iconDefinitions": {
+    "_rjs": { "iconPath": "./images/rjs-file-icon.svg" }
+  },
+  "fileExtensions": {
+    "rjs": "_rjs"
+  }
+}

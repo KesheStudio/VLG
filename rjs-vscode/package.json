@@ -1,0 +1,107 @@
+{
+  "name": "rjs-language-support",
+  "displayName": "RJS Language Support",
+  "description": "RJS language support: syntax highlighting, snippets, bracket matching, folding, symbols, completion and diagnostics.",
+  "version": "0.1.0",
+  "publisher": "rjs-tools",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "rjs",
+    "language",
+    "syntax",
+    "configuration"
+  ],
+  "icon": "images/rjs-file-icon.png",
+  "main": "./src/extension.js",
+  "activationEvents": [
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "rjs",
+        "aliases": [
+          "RJS",
+          "rjs"
+        ],
+        "extensions": [
+          ".rjs"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./images/rjs-file-icon.svg",
+          "dark": "./images/rjs-file-icon.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rjs",
+        "scopeName": "source.rjs",
+        "path": "./syntaxes/rjs.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "rjs",
+        "path": "./snippets/rjs.json"
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "rjs-file-icons",
+        "label": "RJS File Icons",
+        "path": "./rjs-icon-theme.json"
+      }
+    ],
+    "configuration": {
+      "title": "RJS",
+      "properties": {
+        "rjs.diagnostics.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable basic RJS syntax diagnostics."
+        },
+        "rjs.completion.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable RJS keyword and symbol completion."
+        },
+        "rjs.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Reserved for future language-server tracing."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "rjs.validateDocument",
+        "title": "RJS: Validate Current Document"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "rjs.validateDocument",
+          "when": "editorLangId == rjs"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "check": "node --check src/extension.js"
+  },
+  "devDependencies": {}
+}

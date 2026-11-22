@@ -1,0 +1,44 @@
+{
+  "$schema": "schema.tauri.app.config.2.json",
+  "productName": "vlg",
+  "version": "0.1.0",
+  "identifier": "cn.czgrzx.vlg",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "vlg",
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources":{
+      "../res/image/":"image/",
+      "../res/audio/":"audio/",
+      "../res/video/":"video/",
+      "../res/config/":"config/",
+      "../res/level/":"level/",
+      "../res/saves/":"saves/",
+      "../res/text/":"text/"
+    }
+  }
+}

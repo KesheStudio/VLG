@@ -1,0 +1,50 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "RJS",
+  "scopeName": "source.rjs",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#imports" },
+    { "include": "#exports" },
+    { "include": "#constants" },
+    { "include": "#numbers" },
+    { "include": "#references" },
+    { "include": "#operators" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comments": { "patterns": [
+      { "name": "comment.line.double-slash.rjs", "match": "//.*$" },
+      { "name": "comment.block.rjs", "begin": "/\\*", "end": "\\*/" }
+    ] },
+    "strings": { "name": "string.quoted.double.rjs", "begin": "\"", "end": "\"", "patterns": [
+      { "name": "constant.character.escape.rjs", "match": "\\\\." }
+    ] },
+    "imports": { "patterns": [
+      { "name": "keyword.control.import.rjs", "match": "\\bimport\\b" },
+      { "name": "keyword.control.from.rjs", "match": "\\bfrom\\b" },
+      { "name": "punctuation.definition.import.rjs", "match": "[{}]" }
+    ] },
+    "exports": { "patterns": [
+      { "name": "keyword.control.export.rjs", "match": "\\bexport\\b" },
+      { "name": "entity.name.type.rjs", "match": "(?<=\\bexport\\s)[A-Za-z_$][\\w$]*" }
+    ] },
+    "constants": { "patterns": [
+      { "name": "constant.language.boolean.rjs", "match": "\\b(?:true|false)\\b" },
+      { "name": "constant.language.null.rjs", "match": "\\bnull\\b" }
+    ] },
+    "numbers": { "name": "constant.numeric.rjs", "match": "(?<![\\w$])-?\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b" },
+    "references": { "patterns": [
+      { "name": "variable.other.rjs", "match": "\\b[A-Za-z_$][\\w$]*(?=\\s*\\.)" },
+      { "name": "variable.other.property.rjs", "match": "(?<=\\.)[A-Za-z_$][\\w$]*" },
+      { "name": "variable.other.rjs", "match": "\\b[A-Za-z_$][\\w$]*\\b" }
+    ] },
+    "operators": { "name": "keyword.operator.assignment.rjs", "match": "=" },
+    "punctuation": { "patterns": [
+      { "name": "punctuation.separator.comma.rjs", "match": "," },
+      { "name": "punctuation.accessor.rjs", "match": "\\." },
+      { "name": "punctuation.section.braces.rjs", "match": "[{}\\[\\]()]" }
+    ] }
+  }
+}

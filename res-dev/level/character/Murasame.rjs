@@ -1,0 +1,5 @@
+export Murasame {
+  name = "丛雨",
+  lastName = "有地",
+  imageList = ["image/Murasame/01.png"]
+}

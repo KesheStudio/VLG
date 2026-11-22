@@ -1,0 +1,37 @@
+{
+  "RJS import": {
+    "prefix": "import",
+    "body": ["import { ${1:Name} } from \"${2:./path/to/file.rjs}\""],
+    "description": "Import an exported value from another RJS file"
+  },
+  "RJS export object": {
+    "prefix": "export",
+    "body": ["export ${1:Name} {", "  ${2:field} = ${3:value}", "}"],
+    "description": "Declare an exported RJS object"
+  },
+  "RJS main": {
+    "prefix": "main",
+    "body": ["export main {", "  ${1:name} = ${2:value}", "}"],
+    "description": "Create the entry-point main object"
+  },
+  "RJS string array": {
+    "prefix": "array",
+    "body": ["${1:items} = [", "  \"${2:item}\"", "]"],
+    "description": "Create an array"
+  },
+  "RJS nested object": {
+    "prefix": "object",
+    "body": ["${1:settings} = {", "  ${2:enabled} = true", "}"],
+    "description": "Create a nested object"
+  },
+  "RJS reference": {
+    "prefix": "ref",
+    "body": ["${1:Module}.${2:field}"],
+    "description": "Reference an imported or previously declared value"
+  },
+  "RJS indexed reference": {
+    "prefix": "index",
+    "body": ["${1:Module}.${2:list}[${3:0}]"],
+    "description": "Access an array element by zero-based index"
+  }
+}

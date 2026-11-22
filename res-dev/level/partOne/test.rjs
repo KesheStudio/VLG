@@ -1,0 +1,5 @@
+import { Murasame } from "../character/Murasame.rjs"
+
+export main {
+  name = Murasame.name,
+}
