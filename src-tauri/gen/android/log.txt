@@ -1,0 +1,27 @@
+Reusing configuration cache.
+> Task :tauri-android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :tauri-android:preBuild UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :tauri-android:preDebugBuild UP-TO-DATE
+> Task :app:preArmDebugBuild UP-TO-DATE
+> Task :tauri-android:javaPreCompileDebug UP-TO-DATE
+> Task :tauri-android:generateDebugResources UP-TO-DATE
+> Task :tauri-android:processDebugNavigationResources UP-TO-DATE
+> Task :app:generateArmDebugResources UP-TO-DATE
+> Task :app:generateArmDebugBuildConfig UP-TO-DATE
+> Task :tauri-android:generateDebugBuildConfig UP-TO-DATE
+> Task :app:packageArmDebugResources UP-TO-DATE
+> Task :tauri-android:packageDebugResources UP-TO-DATE
+> Task :app:processArmDebugNavigationResources UP-TO-DATE
+> Task :app:parseArmDebugLocalResources UP-TO-DATE
+> Task :tauri-android:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateArmDebugRFile UP-TO-DATE
+> Task :tauri-android:generateDebugRFile UP-TO-DATE
+> Task :tauri-android:compileDebugKotlin UP-TO-DATE
+> Task :tauri-android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :tauri-android:bundleLibCompileToJarDebug UP-TO-DATE
+
+> Task :app:compileArmDebugKotlin FAILED
+17 actionable tasks: 1 executed, 16 up-to-date
+Configuration cache entry reused.

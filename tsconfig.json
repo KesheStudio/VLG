@@ -21,11 +21,11 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature":true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types":["node"],
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "paths": {
-    "@/*": ["./src/*"]
-  },
-  "types":["node"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

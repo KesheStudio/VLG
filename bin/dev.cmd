@@ -1,12 +1,11 @@
 @echo off
 setlocal
 
-cd resource-encryption-kit
+cd resEncryption
 
 make crypto
 make pack
 cd ../..
 npm run tauri dev
-@REM  make clean
 
 endlocal

@@ -2,9 +2,6 @@
   "rust-analyzer.linkedProjects": [
     "src-tauri/Cargo.toml"
   ],
-  "rust-analyzer.files.exclude": [
-    "src-tauri/src/utils/rjs/"
-  ],
   "files.watcherExclude": {
     ".git/objects/**": true,
     ".git/subtree-cache/**": true,
@@ -12,7 +9,6 @@
     "*/.git/objects/**": true,
     "*/.git/subtree-cache/**": true,
     "*/.hg/store/**": true,
-    "src-tauri/src/utils/rjs/**":true,
     "rjs-vscode/**":true
   },
   "json.schemas": [

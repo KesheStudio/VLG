@@ -14,9 +14,25 @@ val tauriProperties = Properties().apply {
     }
 }
 
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
+}
+
 android {
     compileSdk = 37
     namespace = "cn.czgrzx.vlg"
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
+
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
         applicationId = "cn.czgrzx.vlg"
@@ -39,6 +55,8 @@ android {
             }
         }
         getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+
             optimization {
                enable = true
             }
@@ -70,6 +88,9 @@ rust {
 }
 
 dependencies {
+    implementation(project(":tauri-android"))
+    implementation(project(":tauri-plugin-fs"))
+    implementation(project(":tauri-plugin-opener"))
     implementation("androidx.webkit:webkit:1.14.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.activity:activity-ktx:1.10.1")
@@ -79,5 +100,3 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.4")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.0")
 }
-
-apply(from = file("tauri.build.gradle.kts"))

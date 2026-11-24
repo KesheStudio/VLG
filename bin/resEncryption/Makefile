@@ -12,7 +12,6 @@ else
   RUN := ./build/crypto
 endif
 
-# Override on command line, e.g. make MANIFEST=release-resources.conf
 MANIFEST ?= resources.conf
 KEY_RS ?= src-tauri/src/utils/crypto/key.rs
 KEY_TMP ?= src-tauri/build_key.tmp

@@ -1,0 +1,6 @@
+{
+  "title":"Test",
+  "backgroundImage":"image/main.jpg",
+  "loadingImage":"image/loading.png",
+  "backgroundMusic":"audio/res.ogg"
+}

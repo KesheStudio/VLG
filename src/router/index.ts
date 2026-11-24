@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
-import { showUnlockTip } from "../utils/unlockTip";
+import { showUnlockTip } from "@/utils/unlockTip";
 
 const routes : RouteRecordRaw[] = [
   {

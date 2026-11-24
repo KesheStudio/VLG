@@ -4,6 +4,26 @@ use tauri::{AppHandle, Manager, Runtime};
 
 use super::decrypt;
 
+/// 读取资源字节。Android 上 `resource_dir()` 返回的是 `asset://localhost/` 而不是磁盘路径，
+/// 必须走 fs 插件（其安卓实现会把 APK 内的 asset 取出并返回文件描述符）；
+/// 桌面端保持原有的 `std::fs::read` 行为。
+fn read_bytes<R: Runtime>(app: &AppHandle<R>, path: &Path) -> Result<Vec<u8>, String> {
+    #[cfg(target_os = "android")]
+    {
+        use tauri_plugin_fs::FsExt;
+        app.fs()
+            .read(path.to_path_buf())
+            .map_err(|e| format!("cannot read resource '{}': {e}", path.display()))
+    }
+
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = app;
+        std::fs::read(path)
+            .map_err(|e| format!("cannot read resource '{}': {e}", path.display()))
+    }
+}
+
 pub fn read_resource<R: Runtime>(
     app: &AppHandle<R>,
     relative_path: &str,
@@ -21,8 +41,7 @@ pub fn read_resource<R: Runtime>(
         .map_err(|e| format!("cannot resolve Tauri resource directory: {e}"))?
         .join(relative);
 
-    let bytes = std::fs::read(&path)
-        .map_err(|e| format!("cannot read resource '{}': {e}", path.display()))?;
+    let bytes = read_bytes(app, &path)?;
 
     if should_decrypt {
         decrypt::decrypt(&bytes)

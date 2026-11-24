@@ -1,13 +1,4 @@
-<template>
-  <div class="tip-mask" @click.self="onOk" @keydown.enter="onOk">
-    <div class="tip-dialog">
-      <p class="tip-text">当前章节尚未解锁</p>
-      <button class="tip-btn" @click="onOk" ref="btnRef">确定</button>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
 const emit = defineEmits<{ (e: "ok"): void }>();
@@ -17,6 +8,14 @@ onMounted(() => btnRef.value?.focus());
 
 const onOk = () => emit("ok");
 </script>
+<template>
+  <div class="tip-mask" @click.self="onOk" @keydown.enter="onOk">
+    <div class="tip-dialog">
+      <p class="tip-text">当前章节尚未解锁</p>
+      <button class="tip-btn" @click="onOk" ref="btnRef">确定</button>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .tip-mask {

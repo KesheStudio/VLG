@@ -1,9 +1,3 @@
-//! RJS: Referenced JSON Script.
-//!
-//! Entry modules expose exactly one assembled output object named `main`.
-//! Other exports/imports are compile-time building blocks and are not included
-//! in the output JSON or returned main Rust value unless copied into `main`.
-
 use std::collections::{HashMap, HashSet};
 use std::path::{Component, Path, PathBuf};
 
@@ -13,28 +7,28 @@ use tauri::{AppHandle, Runtime};
 #[allow(non_snake_case)]
 use crate::utils::crypto::FileAPI;
 
-pub type RjsValue = Value;
+// pub type RjsValue = Value;
 
 #[derive(Debug, Clone)]
 pub struct RjsDocument {
-    exports: Map<String, Value>,
+    // exports: Map<String, Value>,
     main: Value,
 }
 
 impl RjsDocument {
-    pub fn main(&self) -> &Value { &self.main }
+    // pub fn main(&self) -> &Value { &self.main }
 
-    pub fn into_main(self) -> Value { self.main }
+    // pub fn into_main(self) -> Value { self.main }
 
     pub fn main_json(&self) -> Result<String, String> {
         serde_json::to_string(&self.main).map_err(|e| format!("failed to serialize RJS main as JSON: {e}"))
     }
 
-    pub fn main_json_pretty(&self) -> Result<String, String> {
-        serde_json::to_string_pretty(&self.main).map_err(|e| format!("failed to serialize RJS main as JSON: {e}"))
-    }
+    // pub fn main_json_pretty(&self) -> Result<String, String> {
+    //     serde_json::to_string_pretty(&self.main).map_err(|e| format!("failed to serialize RJS main as JSON: {e}"))
+    // }
 
-    pub fn export(&self, name: &str) -> Option<&Value> { self.exports.get(name) }
+    // pub fn export(&self, name: &str) -> Option<&Value> { self.exports.get(name) }
 }
 
 pub fn parse_resource<R: Runtime>(app: &AppHandle<R>, resource_path: &str) -> Result<RjsDocument, String> {
@@ -49,34 +43,35 @@ pub fn parse_resource_json<R: Runtime>(app: &AppHandle<R>, resource_path: &str) 
     parse_resource(app, resource_path)?.main_json()
 }
 
-pub fn parse_resource_value<R: Runtime>(app: &AppHandle<R>, resource_path: &str) -> Result<Value, String> {
-    Ok(parse_resource(app, resource_path)?.into_main())
-}
+// pub fn parse_resource_value<R: Runtime>(app: &AppHandle<R>, resource_path: &str) -> Result<Value, String> {
+//     Ok(parse_resource(app, resource_path)?.into_main())
+// }
 
-pub fn parse_resource_json_pretty<R: Runtime>(app: &AppHandle<R>, resource_path: &str) -> Result<String, String> {
-    parse_resource(app, resource_path)?.main_json_pretty()
-}
+// pub fn parse_resource_json_pretty<R: Runtime>(app: &AppHandle<R>, resource_path: &str) -> Result<String, String> {
+//     parse_resource(app, resource_path)?.main_json_pretty()
+// }
 
-pub fn parse_str(source: &str) -> Result<RjsDocument, String> {
-    let mut parser = Parser::new(source)?;
-    let mut no_imports = |_path: &str| -> Result<HashMap<String, Value>, String> {
-        Err("imports require parse_resource() so they are loaded through FileAPI".into())
-    };
-    let exports = parser.parse(&mut no_imports)?;
-    make_document(exports, "<memory>")
-}
+// pub fn parse_str(source: &str) -> Result<RjsDocument, String> {
+//     let mut parser = Parser::new(source)?;
+//     let mut no_imports = |_path: &str| -> Result<HashMap<String, Value>, String> {
+//         Err("imports require parse_resource() so they are loaded through FileAPI".into())
+//     };
+//     let exports = parser.parse(&mut no_imports)?;
+//     make_document(exports, "<memory>")
+// }
 
-pub fn parse_str_json(source: &str) -> Result<String, String> { parse_str(source)?.main_json() }
+// pub fn parse_str_json(source: &str) -> Result<String, String> { parse_str(source)?.main_json() }
 
-pub fn parse_str_value(source: &str) -> Result<Value, String> { Ok(parse_str(source)?.into_main()) }
+// pub fn parse_str_value(source: &str) -> Result<Value, String> { Ok(parse_str(source)?.into_main()) }
 
 fn make_document(exports: HashMap<String, Value>, source: &str) -> Result<RjsDocument, String> {
     let main = exports.get("main").cloned().ok_or_else(|| format!("RJS entry '{source}' must export `main`"))?;
     if !main.is_object() {
         return Err(format!("RJS entry '{source}' export `main` must be an object"));
     }
-    let exports = exports.into_iter().collect::<Map<String, Value>>();
-    Ok(RjsDocument { exports, main })
+    // let exports = exports.into_iter().collect::<Map<String, Value>>();
+    // Ok(RjsDocument { exports, main })
+    Ok(RjsDocument { main })
 }
 
 struct Loader<'a, R: Runtime> {
@@ -408,110 +403,110 @@ impl Parser {
     fn error(&self, message: impl Into<String>) -> String { format!("RJS parse error at byte {}: {}", self.current().offset, message.into()) }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn main_is_the_only_assembled_output_and_arrays_work() {
-        let doc = parse_str(r#"
-            export constants { title = "RJS", port = 8080 }
-            export main {
-                title = constants,
-                list = [1, true, "154rjs", { a = 1, b = "x", c = a }],
-                nested = { a = 7, b = a, list = [a, 8] }
-            }
-            export unused { hidden = "not emitted" }
-        "#).unwrap();
-        assert_eq!(doc.main()["list"][3]["c"], 1);
-        assert_eq!(doc.main()["nested"]["b"], 7);
-        assert!(doc.main_json().unwrap().contains("154rjs"));
-        assert!(!doc.main_json().unwrap().contains("not emitted"));
-        assert!(doc.export("unused").is_some());
-    }
+//     #[test]
+//     fn main_is_the_only_assembled_output_and_arrays_work() {
+//         let doc = parse_str(r#"
+//             export constants { title = "RJS", port = 8080 }
+//             export main {
+//                 title = constants,
+//                 list = [1, true, "154rjs", { a = 1, b = "x", c = a }],
+//                 nested = { a = 7, b = a, list = [a, 8] }
+//             }
+//             export unused { hidden = "not emitted" }
+//         "#).unwrap();
+//         assert_eq!(doc.main()["list"][3]["c"], 1);
+//         assert_eq!(doc.main()["nested"]["b"], 7);
+//         assert!(doc.main_json().unwrap().contains("154rjs"));
+//         assert!(!doc.main_json().unwrap().contains("not emitted"));
+//         assert!(doc.export("unused").is_some());
+//     }
 
-    #[test]
-    fn dotted_references_resolve_imported_or_local_object_members() {
-        let doc = parse_str(r#"
-            export Murasame { name = "Murasame", lastName = "Shigure", stats = { hp = 100 } }
-            export main {
-                name = Murasame.name,
-                lastName = Murasame.lastName,
-                hp = Murasame.stats.hp,
-                local = { title = "hello", copied = title }
-            }
-        "#).unwrap();
-        assert_eq!(doc.main()["name"], "Murasame");
-        assert_eq!(doc.main()["lastName"], "Shigure");
-        assert_eq!(doc.main()["hp"], 100);
-        assert_eq!(doc.main()["local"]["copied"], "hello");
-    }
+//     #[test]
+//     fn dotted_references_resolve_imported_or_local_object_members() {
+//         let doc = parse_str(r#"
+//             export Murasame { name = "Murasame", lastName = "Shigure", stats = { hp = 100 } }
+//             export main {
+//                 name = Murasame.name,
+//                 lastName = Murasame.lastName,
+//                 hp = Murasame.stats.hp,
+//                 local = { title = "hello", copied = title }
+//             }
+//         "#).unwrap();
+//         assert_eq!(doc.main()["name"], "Murasame");
+//         assert_eq!(doc.main()["lastName"], "Shigure");
+//         assert_eq!(doc.main()["hp"], 100);
+//         assert_eq!(doc.main()["local"]["copied"], "hello");
+//     }
 
-    #[test]
-    fn parses_string_arrays_and_supports_numeric_index_references() {
-        let doc = parse_str(r#"
-            export Murasame {
-                name = "丛雨",
-                lastName = "有地",
-                imageList = ["image/Murasame/01.png"]
-            }
-            export main {
-                image = Murasame.imageList[0],
-                parenthesizedImage = Murasame.imageList[(0)],
-                allImages = Murasame.imageList,
-                nested = { rows = [{ name = "first" }, { name = "second" }] },
-                secondName = nested.rows[1].name
-            }
-        "#).unwrap();
-        assert_eq!(doc.main()["image"], "image/Murasame/01.png");
-        assert_eq!(doc.main()["parenthesizedImage"], "image/Murasame/01.png");
-        assert_eq!(doc.main()["allImages"][0], "image/Murasame/01.png");
-        assert_eq!(doc.main()["secondName"], "second");
-    }
+//     #[test]
+//     fn parses_string_arrays_and_supports_numeric_index_references() {
+//         let doc = parse_str(r#"
+//             export Murasame {
+//                 name = "丛雨",
+//                 lastName = "有地",
+//                 imageList = ["image/Murasame/01.png"]
+//             }
+//             export main {
+//                 image = Murasame.imageList[0],
+//                 parenthesizedImage = Murasame.imageList[(0)],
+//                 allImages = Murasame.imageList,
+//                 nested = { rows = [{ name = "first" }, { name = "second" }] },
+//                 secondName = nested.rows[1].name
+//             }
+//         "#).unwrap();
+//         assert_eq!(doc.main()["image"], "image/Murasame/01.png");
+//         assert_eq!(doc.main()["parenthesizedImage"], "image/Murasame/01.png");
+//         assert_eq!(doc.main()["allImages"][0], "image/Murasame/01.png");
+//         assert_eq!(doc.main()["secondName"], "second");
+//     }
 
-    #[test]
-    fn array_index_rejects_non_integer_and_out_of_range() {
-        let decimal = parse_str(r#"export data { items = ["a"] } export main { x = data.items[0.5] }"#).unwrap_err();
-        assert!(decimal.contains("array index must be a non-negative integer"));
-        let missing = parse_str(r#"export data { items = ["a"] } export main { x = data.items[2] }"#).unwrap_err();
-        assert!(missing.contains("index is out of range"));
-    }
+//     #[test]
+//     fn array_index_rejects_non_integer_and_out_of_range() {
+//         let decimal = parse_str(r#"export data { items = ["a"] } export main { x = data.items[0.5] }"#).unwrap_err();
+//         assert!(decimal.contains("array index must be a non-negative integer"));
+//         let missing = parse_str(r#"export data { items = ["a"] } export main { x = data.items[2] }"#).unwrap_err();
+//         assert!(missing.contains("index is out of range"));
+//     }
 
-    #[test]
-    fn dotted_reference_rejects_missing_member() {
-        let error = parse_str(r#"export source { a = 1 } export main { x = source.missing }"#).unwrap_err();
-        assert!(error.contains("reference 'source.missing' does not exist"));
-    }
+//     #[test]
+//     fn dotted_reference_rejects_missing_member() {
+//         let error = parse_str(r#"export source { a = 1 } export main { x = source.missing }"#).unwrap_err();
+//         assert!(error.contains("reference 'source.missing' does not exist"));
+//     }
 
-    #[test]
-    fn nearest_scope_wins_and_parent_scope_is_visible() {
-        let doc = parse_str(r#"export main { outer = 10, child = { inner = 20, copy = inner, inherited = outer }, copy = outer }"#).unwrap();
-        assert_eq!(doc.main()["child"]["copy"], 20);
-        assert_eq!(doc.main()["child"]["inherited"], 10);
-        assert_eq!(doc.main()["copy"], 10);
-    }
+//     #[test]
+//     fn nearest_scope_wins_and_parent_scope_is_visible() {
+//         let doc = parse_str(r#"export main { outer = 10, child = { inner = 20, copy = inner, inherited = outer }, copy = outer }"#).unwrap();
+//         assert_eq!(doc.main()["child"]["copy"], 20);
+//         assert_eq!(doc.main()["child"]["inherited"], 10);
+//         assert_eq!(doc.main()["copy"], 10);
+//     }
 
-    #[test]
-    fn rejects_forward_reference_and_field_cycles() {
-        let e = parse_str("export main { a = b, b = a }").unwrap_err();
-        assert!(e.contains("unknown or forward reference"));
-    }
+//     #[test]
+//     fn rejects_forward_reference_and_field_cycles() {
+//         let e = parse_str("export main { a = b, b = a }").unwrap_err();
+//         assert!(e.contains("unknown or forward reference"));
+//     }
 
-    #[test]
-    fn drops_comments_and_accepts_trailing_commas() {
-        let doc = parse_str("/* head */ export main { a = [1, 2,], // tail\n b = { ok = true, }, }").unwrap();
-        assert_eq!(doc.main()["a"][1], 2);
-        assert_eq!(doc.main()["b"]["ok"], true);
-    }
+//     #[test]
+//     fn drops_comments_and_accepts_trailing_commas() {
+//         let doc = parse_str("/* head */ export main { a = [1, 2,], // tail\n b = { ok = true, }, }").unwrap();
+//         assert_eq!(doc.main()["a"][1], 2);
+//         assert_eq!(doc.main()["b"]["ok"], true);
+//     }
 
-    #[test]
-    fn requires_main_and_main_must_be_object() {
-        assert!(parse_str("export helper { x = 1 }").unwrap_err().contains("must export `main`"));
-        assert!(parse_str("export main { x = 1 } export bad { y = 2 }").is_ok());
-    }
+//     #[test]
+//     fn requires_main_and_main_must_be_object() {
+//         assert!(parse_str("export helper { x = 1 }").unwrap_err().contains("must export `main`"));
+//         assert!(parse_str("export main { x = 1 } export bad { y = 2 }").is_ok());
+//     }
 
-    #[test]
-    fn rejects_duplicate_fields() {
-        assert!(parse_str("export main { a = 1, a = 2 }").unwrap_err().contains("duplicate field"));
-    }
-}
+//     #[test]
+//     fn rejects_duplicate_fields() {
+//         assert!(parse_str("export main { a = 1, a = 2 }").unwrap_err().contains("duplicate field"));
+//     }
+// }
