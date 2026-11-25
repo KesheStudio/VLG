@@ -1,0 +1,19 @@
+{
+  "audio": {
+    "music": {
+      "isPlay": true,
+      "isFadePlay":true,
+      "fadeTime":1000,
+      "volume": 0.5
+    },
+    "dialogue": {
+      "isPlay": true,
+      "volume": 1
+    },
+    "sfx": {
+      "isPlay": true,
+      "volume": 1
+    }
+  },
+  "dialogue":{}
+}

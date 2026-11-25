@@ -147,10 +147,24 @@ static std::vector<Task> parse_manifest(const fs::path& manifest) {
 
 static void process_task(const Task& task,
                          const std::array<unsigned char, KEY_SIZE>* key) {
-    require(fs::exists(task.source) && fs::is_directory(task.source),
-            "source directory does not exist: " + task.source.string());
+    require(fs::exists(task.source),
+            "source does not exist: " + task.source.string());
     require(task.source != task.destination,
             "source and destination must differ: " + task.source.string());
+
+    // 单文件任务：把模板文件覆盖到目标文件，不删除任何目录。
+    if (fs::is_regular_file(task.source)) {
+        require(!task.encrypt, "encrypt requires a source directory: " + task.source.string());
+        if (!task.destination.parent_path().empty())
+            fs::create_directories(task.destination.parent_path());
+        fs::copy_file(task.source, task.destination, fs::copy_options::overwrite_existing);
+        std::cout << "copied: " << task.source.string() << " -> "
+                  << task.destination.string() << "\n";
+        return;
+    }
+
+    require(fs::is_directory(task.source),
+            "source is neither a file nor a directory: " + task.source.string());
 
     if (fs::exists(task.destination)) fs::remove_all(task.destination);
     fs::create_directories(task.destination);
