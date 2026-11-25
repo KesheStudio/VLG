@@ -1,4 +1,3 @@
 build/
 src-tauri/build_key.tmp
 src-tauri/src/utils/crypto/key.rs
-README.md
