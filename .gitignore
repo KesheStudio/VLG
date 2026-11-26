@@ -13,6 +13,7 @@ dist-ssr
 *.local
 gameTest
 res/**
+release-key.keystore
 
 # Editor directories and files
 .idea

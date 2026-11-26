@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.jpg" alt="VLG logo" width="180" />
+  <img src="public/logo.png" alt="VLG logo" width="180" />
 </p>
 
 <h1 align="center">VLG · Visual Literature Gateway</h1>
