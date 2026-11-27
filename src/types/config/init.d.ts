@@ -1,4 +1,4 @@
-export interface initConfig {
+export interface InitConfig {
   title: string;
   backgroundImage: string;
   loadingImage: string;

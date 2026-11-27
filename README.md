@@ -36,7 +36,7 @@ VLG/
 │  │  ├─ invoke/               暴露给前端的命令：read、read_rjs、音频控制
 │  │  └─ utils/
 │  │     ├─ init.rs            启动时读取 config/window.json 并设置窗口
-│  │     ├─ audio.rs           rodio 音频播放（BGM / 对白 / 音效）
+│  │     ├─ audio.rs           kira 音频播放（BGM / 对白 / 音效）
 │  │     ├─ rjs/               RJS 解析器（含 import 解析）
 │  │     └─ crypto/            AES-256-GCM 解密、资源读取、key.rs
 │  ├─ gen/android/             Android 工程（Tauri CLI 生成，随仓库提交）
@@ -103,7 +103,7 @@ VLG/
 
 ### 3.5 音频
 
-`src-tauri/src/utils/audio.rs` 基于 rodio 维护 BGM、对白、音效三组播放器，音频字节在内存中解密后直接解码播放，不写临时文件。安卓端 rodio 通过 cpal/oboe 使用 C++ 实现，这一点与 `build.rs` 的链接配置相关，详见第 9.4 节。
+`src-tauri/src/utils/audio.rs` 基于 kira 维护 BGM、对白、音效三组播放器，音频字节在内存中解密后直接解码播放，不写临时文件。kira 的底层输出走 cpal：Windows 为 WASAPI、Linux 为 ALSA、安卓为 AAudio。AAudio 自 Android 8.0（API 26）起提供，因此安卓最低版本为 26，详见 4.3 与 9.6。
 
 ## 4. 环境准备
 
@@ -145,6 +145,7 @@ rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-andro
 
 - Android SDK，NDK `27.2.12479018`（`build.rs` 依赖其中的 `libc++_shared.so`）；
 - JDK 21，`JAVA_HOME` 指向它；
+- 最低系统版本 **Android 8.0（API 26）**。这与项目本身的要求一致：前端使用了 `aspect-ratio` 等较新的 CSS 属性，老 WebView 无法正确支持，因此 Android 8.0 是与该 WebView 能力匹配的下限；同时它也是音频链路的硬性要求——kira 依赖的 cpal 0.18 在安卓使用 AAudio，该库从 API 26 才进入 NDK sysroot。`minSdkVersion` 同时写在 `src-tauri/tauri.conf.json` 的 `bundle.android.minSdkVersion` 与 `bin/resEncryption/android/app/build.gradle.kts` 的 `minSdk`，两处必须一致（模板由 `make pack` 同步到工程）；
 - 用于发布签名的 `src-tauri/gen/android/keystore.properties`（字段 `keyAlias`、`keyPassword`、`storeFile`、`storePassword`）。该文件含密钥信息，不随模板分发，缺失时 release 构建会在 Gradle 配置阶段失败。
 
 ## 5. 开发
@@ -226,7 +227,7 @@ bash bin/build.sh android aarch64
 
 - `.sh` 的目标环境是 Git Bash / WSL / Linux / macOS。本次改造只在 Windows 上对它做了静态检查（`bash -n`），**未在 Windows 上实际运行**；Windows 用户请使用 `.bat` 或 `.ps1`。
 - 安卓相关步骤是可选分支，仅当参数为 `android` 或在菜单中选择 2 时才执行。
-- `.bat` 必须以 CRLF + UTF-8 保存、`.ps1` 以 UTF-8 BOM 保存，否则中文提示可能乱码或 CMD 解析异常。
+- `.bat` 必须以 CRLF + UTF-8（无 BOM）保存。cmd 用**启动时**的控制台代码页解析批处理文件，代码页为 936 时直接解析 UTF-8 中文会把行拆断并当成命令执行（表现为 `'xxx' is not recognized`）。因此脚本开头有一段纯 ASCII 引导：检测到当前代码页不是 65001 时，先 `chcp 65001` 并在新的 cmd 进程中重新运行自身，之后再进入中文正文。`.ps1` 保存为 UTF-8 BOM。
 
 ## 6. 构建与发布
 
@@ -269,6 +270,8 @@ npm run tauri android build -- --target aarch64 --apk   # 真机
 等价的一键方式：`bin\build.bat android aarch64`（PowerShell 为 `.\bin\build.ps1 android aarch64`）。
 
 首次在没有 `src-tauri/gen/android` 的机器上构建，需要先执行 `npm run tauri android init` 生成安卓工程，再执行上面的流程。
+
+APK 的 minSdk 为 26（Android 8.0），与项目对较新 WebView 的要求（如 `aspect-ratio`）以及 cpal 的 AAudio 后端一致，详见 4.3 与 9.6。
 
 ### 6.4 构建产物
 
@@ -449,6 +452,7 @@ foreach ($p in $pairs) {
 | 修改 `Cargo.toml` / `lib.rs` / 安卓文件后，重新打包即丢失 | 只改了工程内文件，未同步模板 | 改模板后重新 `make pack`，见 8.4 |
 | 首页黑屏，日志出现 `cannot read resource 'asset://localhost/...'` | 安卓资源读取未走 fs 插件 | 确认 `FileAPI.rs` 的 `read_bytes` 含 android 分支，重新 `make pack` 并构建，见 9.5 |
 | 启动即闪退，日志出现 `cannot locate symbol "__cxa_pure_virtual"` | 未链接 C++ 运行时 | 确认 `build.rs` 的链接声明，重新构建，见 9.4 |
+| 安卓链接失败，日志出现 `ld.lld: error: unable to find library -laaudio` | minSdk 仍是 24，而 cpal 0.18 的 AAudio 后端要求 API 26，NDK 的 API 24 sysroot 没有该库 | 把两处 minSdk 改为 26，重新 `make pack` 并构建，见 9.6 |
 | 能启动但资源解密报错 / 图片裂开 | 密钥与资源不是同一次打包产物 | 重新 `make pack` 后再构建，见 6.1 |
 | 打包后资源 404 | `bundle.resources` 映射缺失或路径前缀不一致 | 对照 7.4 |
 | `openssl/evp.h` 找不到 | 缺少 OpenSSL 开发包 | 安装并配置包管理路径，见 `bin/resEncryption/README.md` |
@@ -507,7 +511,7 @@ UnsatisfiedLinkError: dlopen failed: cannot locate symbol "__cxa_pure_virtual"
 referenced by lib/x86_64/libvlg_lib.so
 ```
 
-原因：音频链路 `rodio → cpal → oboe` 的 C++ 实现未把 C++ 运行时链进 cdylib，`libvlg_lib.so` 中的 `__cxa_pure_virtual`、`__gxx_personality_v0` 等符号未定义，而现代 Android 没有 libstdc++ 兜底。
+原因：早期使用 rodio 时，音频链路 `rodio → cpal → oboe` 的 C++ 实现未把 C++ 运行时链进 cdylib，`libvlg_lib.so` 中的 `__cxa_pure_virtual`、`__gxx_personality_v0` 等符号未定义，而现代 Android 没有 libstdc++ 兜底。音频库换成 kira 后该链接声明继续保留（cpal 的底层实现同样可能引入本地库）。
 
 处理方式（已固化在 `src-tauri/build.rs`，并由打包器托管）：
 
@@ -546,7 +550,25 @@ Failed to initialize the window: cannot read resource
 
 验证：安装后 `adb logcat` 中不再出现 `cannot read resource`；画面先显示启动图、随后显示首页背景。桌面端 `cargo check` 通过、行为不变。
 
-### 9.6 解密失败、黑屏或图片裂开
+### 9.6 安卓链接失败：unable to find library -laaudio（已修复）
+
+现象：`npm run tauri android build -- --target aarch64 --apk` 在链接阶段失败，日志为
+
+```text
+aarch64-linux-android24-clang.cmd ... -landroid -laaudio ...
+ld.lld: error: unable to find library -laaudio
+```
+
+原因：音频库换成 kira 0.12 后，底层 cpal 0.18 的安卓后端由 oboe 改为 AAudio（cpal 改用 `ndk::audio`），链接时会请求 `libaaudio.so`。AAudio 直到 **API 26** 才进入 NDK sysroot：`ndk/27.2.12479018/.../sysroot/usr/lib/aarch64-linux-android/` 下只有 `26` 及以上目录包含 `libaaudio.so`。当时 `minSdkVersion` 为 24，链接器因此使用 `aarch64-linux-android24-clang` 并找不到该库。
+
+处理方式（已固化）：
+
+1. `src-tauri/tauri.conf.json` 的 `bundle.android.minSdkVersion` 改为 `26`（Tauri CLI 据此选择 `*-android26-clang` 链接器）；
+2. `bin/resEncryption/android/app/build.gradle.kts` 的 `minSdk` 改为 `26`，执行 `make pack` 同步到 `src-tauri/gen/android/app/build.gradle.kts`。后者由打包器托管，直接改工程内文件会在下次打包时被覆盖。
+
+关于 minSdk 26：这不是为了迁就 AAudio 才放宽的下限，而是与项目本身的要求一致——前端使用了 `aspect-ratio` 等较新的 CSS 属性，老 WebView 无法正确支持，项目本来就不面向 Android 7.x；Android 8.0（API 26）是与该 WebView 能力匹配的下限，同时恰好满足 cpal 0.18 的 AAudio 要求。两者一致，因此不需要为更低版本做额外兼容处理。
+
+### 9.7 解密失败、黑屏或图片裂开
 
 几乎都是密钥与资源不是同一次打包的产物，例如：先构建、后打包；或清空缓存后只重新构建未重新打包；或手工执行了 `make clean`（会删除 `key.rs`）。处理：
 
@@ -557,7 +579,7 @@ cd ../..
 npm run tauri build        # 或 npm run tauri android build -- --target aarch64 --apk
 ```
 
-### 9.7 其它
+### 9.8 其它
 
 - `resource file not found`：核对 `bundle.resources` 映射与前端传入的路径前缀（第 7.4 节）。
 - Rust 报找不到 `key.rs`：先执行 `make pack`。

@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { onMounted, ref, nextTick } from "vue";
 import { RouterView } from "vue-router";
-import { initConfig } from "@/types/config/init";
-import { FileAPI } from "@/utils/FileAPI";
+import type { InitConfig } from "@/types/config/init";
+import { FileAPI } from "@/utils/fileAPI";
 import { useKVStore } from "@/stores/kv";
 import { playFadeInOut } from "@/utils/animations";
+import { AudioPlayer } from "./utils/audioPlayer";
 
 const loadingImageUrl = ref<string>("");
 const vlgLogoRef = ref<HTMLImageElement>();
@@ -12,6 +13,7 @@ const loadingRef = ref<HTMLImageElement>();
 const isImageReady = ref<boolean>(false);
 const showRouter = ref<boolean>(false);
 const kv = useKVStore();
+let initConfig: object | InitConfig = {};
 
 const playAnimationSequence = async () => {
   await nextTick();
@@ -39,12 +41,13 @@ const playAnimationSequence = async () => {
 
 const init = async (): Promise<void> => {
   try {
-    const initConfig = await FileAPI.readConfig<initConfig>("config/mainPage.json");
-    const loadingUrl = (await FileAPI.readAsBlobUrl(initConfig.loadingImage)).url;
-    const mainUrl = (await FileAPI.readAsBlobUrl(initConfig.backgroundImage)).url;
+    initConfig = await FileAPI.readConfig<InitConfig>("config/mainPage.json");
+
+    const loadingUrl = (
+      await FileAPI.readAsBlobUrl((initConfig as InitConfig).loadingImage)
+    ).url;
 
     loadingImageUrl.value = loadingUrl;
-    kv.set("mainBackgroundImageUrl", mainUrl);
     isImageReady.value = true;
 
     playAnimationSequence();
@@ -53,8 +56,44 @@ const init = async (): Promise<void> => {
   }
 };
 
-onMounted(() => {
-  init();
+const loadRes = async (): Promise<void> => {
+  AudioPlayer.bgm.queue.addMany(["audio/res.ogg"])
+  AudioPlayer.bgm.queue.loadAll()
+  kv.set(
+    "mainBackgroundImageUrl",
+    (await FileAPI.readAsBlobUrl((initConfig as InitConfig).backgroundImage))
+      .url,
+  );
+  kv.set(
+    "playGameImage",
+    (await FileAPI.readAsBlobUrl("image/ui/button/playGame.png")).url,
+  );
+  kv.set(
+    "loadSaveImage",
+    (await FileAPI.readAsBlobUrl("image/ui/button/loadSave.png")).url,
+  );
+  kv.set(
+    "unlockedResourcesImage",
+    (await FileAPI.readAsBlobUrl("image/ui/button/unlockedResources.png")).url,
+  );
+  kv.set(
+    "gameSettingsImage",
+    (await FileAPI.readAsBlobUrl("image/ui/button/gameSettings.png")).url,
+  );
+  kv.set(
+    "sideStoryImage",
+    (await FileAPI.readAsBlobUrl("image/ui/button/sideStory.png")).url,
+  );
+  kv.set(
+    "exitGameImage",
+    (await FileAPI.readAsBlobUrl("image/ui/button/exitGame.png")).url,
+  );
+};
+
+onMounted(async() => {
+
+  await init();
+  loadRes();
 });
 </script>
 
@@ -80,6 +119,14 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.placeholder {
+  color: #ffffff;
+  // font-size: ;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
 .TopBox {
   aspect-ratio: 16 / 9;
   width: 100vw;
@@ -118,5 +165,48 @@ onMounted(() => {
     left: 0;
     z-index: 0;
   }
+}
+</style>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none !important;
+  -webkit-touch-callout: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+}
+
+#app {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #111;
+}
+
+img,
+video,
+audio,
+canvas,
+svg {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: auto;
+}
+
+a {
+  -webkit-user-drag: none !important;
+}
+
+img,
+video,
+audio {
+  -webkit-user-drag: none !important;
 }
 </style>

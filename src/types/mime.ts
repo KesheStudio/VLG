@@ -19,7 +19,7 @@ export type MimeType =
   | 'text/css'
   | 'application/javascript'
 
-export const Mime = {
+export const mime = {
   PNG: 'image/png',
   JPEG: 'image/jpeg',
   GIF: 'image/gif',

@@ -4,9 +4,6 @@ use tauri::{AppHandle, Manager, Runtime};
 
 use super::decrypt;
 
-/// 读取资源字节。Android 上 `resource_dir()` 返回的是 `asset://localhost/` 而不是磁盘路径，
-/// 必须走 fs 插件（其安卓实现会把 APK 内的 asset 取出并返回文件描述符）；
-/// 桌面端保持原有的 `std::fs::read` 行为。
 fn read_bytes<R: Runtime>(app: &AppHandle<R>, path: &Path) -> Result<Vec<u8>, String> {
     #[cfg(target_os = "android")]
     {

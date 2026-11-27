@@ -1,6 +1,19 @@
 @echo off
-chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
+rem cmd parses batch files with the console code page active at startup.
+rem If it is not 65001, the UTF-8 Chinese text below would be misparsed
+rem (lines get split and executed as commands), so relaunch once in a
+rem child cmd whose code page is 65001 before the Chinese body is read.
+for /f "tokens=2 delims=:." %%A in ('chcp.com') do set "VLG_CP=%%A"
+if not "%VLG_CP: =%"=="65001" (
+    if not defined VLG_BAT_RELAUNCH (
+        set "VLG_BAT_RELAUNCH=1"
+        chcp 65001 >nul
+        cmd /c call "%~f0" %*
+        exit /b !ERRORLEVEL!
+    )
+)
+chcp 65001 >nul
 title VLG 一键开发
 
 rem ============================================================

@@ -1,6 +1,19 @@
 @echo off
-chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
+rem cmd parses batch files with the console code page active at startup.
+rem If it is not 65001, the UTF-8 Chinese text below would be misparsed
+rem (lines get split and executed as commands), so relaunch once in a
+rem child cmd whose code page is 65001 before the Chinese body is read.
+for /f "tokens=2 delims=:." %%A in ('chcp.com') do set "VLG_CP=%%A"
+if not "%VLG_CP: =%"=="65001" (
+    if not defined VLG_BAT_RELAUNCH (
+        set "VLG_BAT_RELAUNCH=1"
+        chcp 65001 >nul
+        cmd /c call "%~f0" %*
+        exit /b !ERRORLEVEL!
+    )
+)
+chcp 65001 >nul
 title VLG 一键构建
 
 rem ============================================================
@@ -149,7 +162,7 @@ if "!CODE!"=="0" (
     echo        替代做法（README 第 9.3 节）：
     echo          cd bin\resEncryption ^&^& make pack
     echo          npm run tauri android build -- --debug --target %ABI% --apk   （会在链接处失败）
-    echo          copy /Y "%ROOT%\src-tauri\target\%TRIPLE%\debug\libvlg_lib.so" "%ROOT%\src-tauri\gen\android\app\src\main\jniLibs\%ABI_DIR%\" >nul
+    echo          copy /Y "%ROOT%\src-tauri\target\%TRIPLE%\debug\libvlg_lib.so" "%ROOT%\src-tauri\gen\android\app\src\main\jniLibs\%ABI_DIR%\libvlg_lib.so"
     echo          然后按 README 9.3 节用 gradlew 打包（排除 rustBuild 任务），或改用管理员终端重试。
     echo     2^) 缺少 NDK 27.2.12479018 或 JDK 21 —— 见上面 [检查] 阶段的提示。
     echo     3^) 签名失败 —— 确认 src-tauri\gen\android\keystore.properties 存在且字段完整

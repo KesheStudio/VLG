@@ -11,21 +11,21 @@ export class BlobUrl implements Disposable {
     let blob: Blob;
 
     if (Array.isArray(source)) {
-      blob = new Blob([new Uint8Array(source) as any], {
+      blob = new Blob([new Uint8Array(source)], {
         type: mime ?? "application/octet-stream",
       });
     } else if (source instanceof Blob) {
       blob = source;
     } else if (source instanceof Uint8Array) {
-      blob = new Blob([source as any], {
+      blob = new Blob([source.slice()], {
         type: mime ?? "application/octet-stream",
       });
     } else if (source instanceof ArrayBuffer) {
-      blob = new Blob([source as any], {
+      blob = new Blob([source], {
         type: mime ?? "application/octet-stream",
       });
     } else {
-      blob = new Blob([source as any]);
+      blob = new Blob([source]);
     }
 
     this._url = URL.createObjectURL(blob);

@@ -3,7 +3,7 @@
     "music": {
       "isPlay": true,
       "isFadePlay":true,
-      "fadeTime":1000,
+      "fadeTime":3000,
       "volume": 0.5
     },
     "dialogue": {

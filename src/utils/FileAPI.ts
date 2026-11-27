@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { BlobUrl } from "@/utils/BlobUrl";
+import { BlobUrl } from "@/utils/blobUrl";
 import { type MimeType, mimeFromPath } from "@/types/mime";
 
 export interface ReadOptions {
